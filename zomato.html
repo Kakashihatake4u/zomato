@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zomato's Race to Capture the FoodTech Market</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #E23744;
+    --red-light: #f5a0a7;
+    --red-dark: #b52b36;
+    --white: #FFFFFF;
+    --grey: #F4F4F4;
+    --grey-mid: #E8E8E8;
+    --grey-dark: #999;
+    --black: #0A0A0A;
+    --ink: #1A1A1A;
+    --ink-mid: #444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-snap-type: y mandatory; overflow-y: scroll; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--black);
+    color: var(--ink);
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--red);
+    border-radius: 50%;
+    position: fixed; z-index: 9999;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.3s, height 0.3s;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid rgba(226,55,68,0.5);
+    border-radius: 50%;
+    position: fixed; z-index: 9998;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease, width 0.3s, height 0.3s;
+  }
+
+  /* Slide nav dots */
+  .nav-dots {
+    position: fixed; right: 2rem; top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .nav-dot.active { background: var(--red); transform: scale(1.4); border-color: var(--red); }
+  .nav-dot:hover { background: rgba(255,255,255,0.6); }
+
+  /* Slide number */
+  .slide-num {
+    position: fixed; left: 2rem; bottom: 2rem;
+    z-index: 1000;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed; top: 0; left: 0;
+    height: 2px; background: var(--red);
+    z-index: 1000;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ===== SLIDES ===== */
+  .slide {
+    height: 100vh; width: 100vw;
+    scroll-snap-align: start;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Animated elements */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+  .fade-up:nth-child(2) { transition-delay: 0.15s; }
+  .fade-up:nth-child(3) { transition-delay: 0.25s; }
+  .fade-up:nth-child(4) { transition-delay: 0.35s; }
+  .fade-up:nth-child(5) { transition-delay: 0.45s; }
+  .fade-up:nth-child(6) { transition-delay: 0.55s; }
+
+  /* ===========================
+     SLIDE 1 — TITLE
+  =========================== */
+  #slide-1 {
+    background: var(--black);
+    flex-direction: column;
+    justify-content: center;
+  }
+  .s1-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 60% 50%, rgba(226,55,68,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 15% 80%, rgba(226,55,68,0.06) 0%, transparent 60%);
+  }
+  .s1-grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .s1-img {
+    position: absolute; right: 0; top: 0; bottom: 0;
+    width: 50%;
+    background: url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=900&q=80') center/cover;
+    mask-image: linear-gradient(to left, rgba(0,0,0,0.5), transparent 80%);
+    -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,0.5), transparent 80%);
+    opacity: 0.35;
+  }
+  .s1-content {
+    position: relative; z-index: 2;
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-items: center; gap: 4rem;
+  }
+  .s1-left {}
+  .s1-tag {
+    display: inline-block;
+    font-size: 0.7rem; letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--red);
+    border: 1px solid rgba(226,55,68,0.4);
+    padding: 0.4rem 1rem; border-radius: 2rem;
+    margin-bottom: 2rem;
+  }
+  .s1-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4.2rem);
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+  }
+  .s1-title span { color: var(--red); display: block; }
+  .s1-sub {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.95rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+  .s1-right {
+    display: flex; flex-direction: column; gap: 1.5rem;
+    align-items: flex-start;
+  }
+  .s1-meta {
+    padding: 2rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 1.2rem;
+    width: 100%;
+  }
+  .s1-meta-label {
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--red); margin-bottom: 0.8rem;
+  }
+  .s1-meta-value { color: rgba(255,255,255,0.75); font-size: 0.9rem; font-weight: 500; }
+  .s1-team {
+    display: flex; flex-wrap: wrap; gap: 0.6rem;
+  }
+  .s1-member {
+    background: rgba(226,55,68,0.1);
+    border: 1px solid rgba(226,55,68,0.2);
+    color: rgba(255,255,255,0.7);
+    font-size: 0.75rem;
+    padding: 0.4rem 0.9rem; border-radius: 2rem;
+  }
+  .s1-year-badge {
+    position: absolute; bottom: 3rem; left: 5rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 7rem; font-weight: 800;
+    color: rgba(255,255,255,0.03);
+    line-height: 1; pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ===========================
+     SLIDE 2 — INDUSTRY CONTEXT
+  =========================== */
+  #slide-2 {
+    background: var(--grey);
+    padding: 4rem 5rem;
+  }
+  .s2-layout {
+    max-width: 1200px; width: 100%;
+    display: grid; grid-template-columns: 1fr 1.5fr;
+    gap: 5rem; align-items: center;
+  }
+  .slide-eyebrow {
+    font-size: 0.68rem; letter-spacing: 0.25em;
+    text-transform: uppercase; color: var(--red);
+    font-weight: 600; margin-bottom: 1.2rem;
+  }
+  .slide-h {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 800; color: var(--ink);
+    line-height: 1.1; margin-bottom: 1.5rem;
+  }
+  .s2-img {
+    border-radius: 1.5rem; overflow: hidden;
+    height: 480px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.15);
+    position: relative;
+  }
+  .s2-img img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .s2-img-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(226,55,68,0.3) 0%, transparent 60%);
+  }
+  .bento-grid-2 {
+    display: grid; grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 1rem;
+  }
+  .bento-card {
+    background: var(--white);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid var(--grey-mid);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .bento-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+  .bento-card.span2 { grid-column: 1 / -1; }
+  .bento-card.red-card { background: var(--red); color: var(--white); border-color: var(--red); }
+  .bento-icon { font-size: 1.8rem; margin-bottom: 0.8rem; }
+  .bento-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .bento-text { font-size: 0.82rem; color: var(--grey-dark); line-height: 1.6; }
+  .red-card .bento-text { color: rgba(255,255,255,0.8); }
+  .red-card .bento-title { color: var(--white); }
+
+  /* ===========================
+     SLIDE 3 — STRATEGIC STAGE
+  =========================== */
+  #slide-3 { background: var(--black); }
+  .s3-bg {
+    position: absolute; inset: 0;
+    background: url('https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=1400&q=80') center/cover;
+    opacity: 0.08;
+  }
+  .s3-layout {
+    position: relative; z-index: 2;
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 5rem; align-items: center;
+  }
+  .s3-left .slide-eyebrow { color: var(--red-light); }
+  .s3-left .slide-h { color: var(--white); }
+  .s3-stat-row { display: flex; gap: 2rem; margin-top: 2rem; }
+  .s3-stat {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    flex: 1;
+  }
+  .s3-stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem; font-weight: 800;
+    color: var(--red); margin-bottom: 0.3rem;
+  }
+  .s3-stat-label { font-size: 0.78rem; color: rgba(255,255,255,0.5); }
+  .s3-points { display: flex; flex-direction: column; gap: 1rem; }
+  .s3-point {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1.2rem 1.5rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-left: 3px solid var(--red);
+    border-radius: 0.8rem;
+  }
+  .s3-point-text { font-size: 0.88rem; color: rgba(255,255,255,0.7); line-height: 1.5; }
+
+  /* ===========================
+     SLIDE 4 — FOUNDER
+  =========================== */
+  #slide-4 { background: var(--white); }
+  .s4-layout {
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+    display: grid; grid-template-columns: 1.2fr 1fr;
+    gap: 5rem; align-items: center;
+  }
+  .s4-founder-card {
+    background: var(--grey);
+    border-radius: 2rem;
+    overflow: hidden;
+    position: relative;
+    height: 480px;
+  }
+  .s4-founder-bg {
+    width: 100%; height: 100%;
+    background: url('https://images.unsplash.com/photo-1556761175-b413da4baf72?w=700&q=80') center/cover;
+    opacity: 0.7;
+  }
+  .s4-founder-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(10,10,10,0.95) 0%, transparent 60%);
+    padding: 2rem;
+  }
+  .s4-founder-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem; font-weight: 800; color: var(--white);
+  }
+  .s4-founder-sub { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-top: 0.3rem; }
+  .s4-right {}
+  .s4-timeline { display: flex; flex-direction: column; gap: 0; margin-top: 1.5rem; }
+  .s4-event {
+    display: flex; gap: 1.5rem;
+    padding-bottom: 2rem;
+    position: relative;
+  }
+  .s4-event:not(:last-child)::after {
+    content: '';
+    position: absolute; left: 19px; top: 40px;
+    width: 2px; height: calc(100% - 10px);
+    background: var(--grey-mid);
+  }
+  .s4-dot {
+    width: 40px; height: 40px; min-width: 40px;
+    background: var(--red); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; z-index: 1;
+  }
+  .s4-event-year {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem; font-weight: 700; color: var(--red);
+    letter-spacing: 0.1em; margin-bottom: 0.3rem;
+  }
+  .s4-event-text { font-size: 0.88rem; color: var(--ink-mid); line-height: 1.5; }
+
+  /* ===========================
+     SLIDE 5 — TRANSFORMATION
+  =========================== */
+  #slide-5 { background: var(--red); }
+  .s5-layout {
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 5rem; align-items: center;
+  }
+  .s5-left .slide-eyebrow { color: rgba(255,255,255,0.6); }
+  .s5-left .slide-h { color: var(--white); font-size: clamp(2rem, 4vw, 3.5rem); }
+  .s5-desc { color: rgba(255,255,255,0.75); font-size: 0.95rem; line-height: 1.8; margin-top: 1rem; }
+  .s5-features { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+  .s5-feat {
+    display: flex; align-items: center; gap: 1rem;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 0.8rem;
+    padding: 1rem 1.5rem;
+  }
+  .s5-feat-icon { font-size: 1.3rem; }
+  .s5-feat-text { color: rgba(255,255,255,0.9); font-size: 0.88rem; }
+  .s5-big-year {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(8rem, 18vw, 15rem);
+    font-weight: 800;
+    color: rgba(255,255,255,0.12);
+    line-height: 1;
+    text-align: center;
+  }
+  .s5-logo-area {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2rem;
+  }
+  .s5-arrow {
+    color: rgba(255,255,255,0.4);
+    font-size: 2rem; margin: 0.5rem 0;
+  }
+  .s5-brand-old, .s5-brand-new {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; text-align: center;
+    padding: 1rem 2.5rem;
+    border-radius: 1rem;
+  }
+  .s5-brand-old {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+    font-size: 2rem;
+    text-decoration: line-through;
+    text-decoration-color: rgba(255,255,255,0.3);
+  }
+  .s5-brand-new {
+    background: var(--white);
+    color: var(--red);
+    font-size: 2.8rem;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  }
+
+  /* ===========================
+     SLIDE 6 — TIMELINE (H-SCROLL)
+  =========================== */
+  #slide-6 { background: var(--black); overflow: hidden; }
+  .s6-header {
+    position: absolute; top: 3rem; left: 5rem;
+    z-index: 5;
+  }
+  .s6-header .slide-eyebrow { color: var(--red); }
+  .s6-header .slide-h { color: var(--white); }
+  .s6-scroll-hint {
+    position: absolute; top: 3rem; right: 5rem;
+    display: flex; align-items: center; gap: 0.6rem;
+    color: rgba(255,255,255,0.4); font-size: 0.75rem; letter-spacing: 0.1em;
+    z-index: 5;
+  }
+  .s6-scroll-hint-arrow { animation: hSlideAnim 1.5s infinite ease-in-out; }
+  @keyframes hSlideAnim { 0%,100%{transform:translateX(0)} 50%{transform:translateX(8px)} }
+
+  .s6-track-wrapper {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    top: 140px;
+    display: flex; align-items: center;
+    padding: 0 5rem;
+    overflow: hidden;
+  }
+  .s6-track {
+    display: flex;
+    gap: 0;
+    align-items: center;
+    transition: transform 0.6s cubic-bezier(0.25,0.1,0.25,1);
+    will-change: transform;
+  }
+  .s6-item {
+    min-width: 300px;
+    padding: 0 1.5rem;
+    position: relative;
+  }
+  .s6-item::before {
+    content: '';
+    position: absolute; top: 50%; left: 0; right: 0;
+    height: 2px; background: rgba(255,255,255,0.08);
+  }
+  .s6-dot-outer {
+    width: 50px; height: 50px;
+    background: rgba(226,55,68,0.15);
+    border: 2px solid var(--red);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+    position: relative; z-index: 2;
+    font-size: 1.2rem;
+  }
+  .s6-year {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem; font-weight: 800; color: var(--red);
+    text-align: center; margin-bottom: 0.8rem;
+  }
+  .s6-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .s6-card-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 0.5rem; }
+  .s6-card-text { font-size: 0.78rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+  .s6-prev, .s6-next {
+    position: absolute; bottom: 2.5rem;
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1.1rem; color: var(--white);
+    transition: background 0.3s, border-color 0.3s;
+    z-index: 10;
+  }
+  .s6-prev:hover, .s6-next:hover { background: var(--red); border-color: var(--red); }
+  .s6-prev { left: 5rem; }
+  .s6-next { left: calc(5rem + 60px); }
+
+  /* ===========================
+     SLIDE 7 — BUSINESS OFFERINGS
+  =========================== */
+  #slide-7 { background: var(--grey); }
+  .s7-layout {
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+  }
+  .s7-header { margin-bottom: 3rem; }
+  .s7-bento {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    grid-template-rows: 200px 200px;
+    gap: 1.2rem;
+  }
+  .s7-card {
+    background: var(--white);
+    border-radius: 1.2rem;
+    padding: 2rem;
+    border: 1px solid var(--grey-mid);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .s7-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
+  .s7-card.tall { grid-row: 1 / 3; }
+  .s7-card.red { background: var(--red); border-color: var(--red); }
+  .s7-card-icon { font-size: 2.2rem; margin-bottom: 1rem; }
+  .s7-card-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-bottom: 0.6rem; }
+  .s7-card.red .s7-card-title { color: var(--white); }
+  .s7-card-text { font-size: 0.82rem; color: var(--grey-dark); line-height: 1.6; }
+  .s7-card.red .s7-card-text { color: rgba(255,255,255,0.8); }
+  .s7-card-bg-num {
+    position: absolute; bottom: -1rem; right: -0.5rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 6rem; font-weight: 800;
+    opacity: 0.06; color: var(--ink);
+    pointer-events: none;
+  }
+  .s7-card.red .s7-card-bg-num { color: var(--white); opacity: 0.15; }
+  .s7-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+  .s7-tag {
+    background: var(--grey); border: 1px solid var(--grey-mid);
+    font-size: 0.7rem; padding: 0.3rem 0.8rem; border-radius: 2rem;
+    color: var(--ink-mid);
+  }
+
+  /* ===========================
+     SLIDE 8 — MARKETING
+  =========================== */
+  #slide-8 { background: var(--white); }
+  .s8-layout {
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+    display: grid; grid-template-columns: 1fr 1.4fr;
+    gap: 5rem; align-items: center;
+  }
+  .s8-pillars { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 2rem; }
+  .s8-pillar {
+    display: flex; align-items: center; gap: 1.2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 0.8rem;
+    background: var(--grey);
+    border: 1px solid var(--grey-mid);
+    cursor: default;
+    transition: all 0.3s;
+  }
+  .s8-pillar:hover { background: var(--red); border-color: var(--red); }
+  .s8-pillar:hover .s8-pillar-text { color: var(--white); }
+  .s8-pillar:hover .s8-pillar-icon { filter: grayscale(0); }
+  .s8-pillar-icon { font-size: 1.4rem; min-width: 32px; }
+  .s8-pillar-text { font-size: 0.88rem; color: var(--ink-mid); font-weight: 500; transition: color 0.3s; }
+  .s8-visual {
+    display: grid; grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 1rem; height: 420px;
+  }
+  .s8-vcard {
+    border-radius: 1rem; overflow: hidden;
+    position: relative;
+  }
+  .s8-vcard img { width: 100%; height: 100%; object-fit: cover; }
+  .s8-vcard-label {
+    position: absolute; bottom: 0.8rem; left: 0.8rem;
+    background: rgba(0,0,0,0.7);
+    color: var(--white); font-size: 0.7rem;
+    padding: 0.3rem 0.7rem; border-radius: 0.4rem;
+    letter-spacing: 0.08em;
+  }
+  .s8-vcard.big { grid-column: 1 / -1; }
+
+  /* ===========================
+     SLIDE 9 — COMPETITION
+  =========================== */
+  #slide-9 { background: var(--black); }
+  .s9-bg {
+    position: absolute; inset: 0;
+    background: url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1400&q=80') center/cover;
+    opacity: 0.06;
+  }
+  .s9-layout {
+    position: relative; z-index: 2;
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+    display: grid; grid-template-columns: 1fr 1.2fr;
+    gap: 5rem; align-items: center;
+  }
+  .s9-left .slide-eyebrow { color: var(--red); }
+  .s9-left .slide-h { color: var(--white); }
+  .s9-competitors { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+  .s9-comp {
+    display: flex; align-items: center; gap: 1.2rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 0.8rem;
+    padding: 1.2rem 1.5rem;
+  }
+  .s9-comp-icon { font-size: 1.5rem; }
+  .s9-comp-name { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--white); }
+  .s9-comp-detail { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-top: 0.1rem; }
+  .s9-comp-badge {
+    margin-left: auto;
+    background: var(--red); color: var(--white);
+    font-size: 0.65rem; padding: 0.25rem 0.6rem;
+    border-radius: 2rem; letter-spacing: 0.05em;
+  }
+  .s9-right { display: flex; flex-direction: column; gap: 1.2rem; }
+  .s9-dev {
+    padding: 1.5rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 1rem;
+    border-left: 3px solid var(--red);
+  }
+  .s9-dev-year { font-size: 0.68rem; color: var(--red); letter-spacing: 0.2em; margin-bottom: 0.4rem; }
+  .s9-dev-text { font-size: 0.88rem; color: rgba(255,255,255,0.65); line-height: 1.5; }
+
+  /* ===========================
+     SLIDE 10 — SPLIT COMPARISON
+  =========================== */
+  #slide-10 { background: var(--black); flex-direction: row; overflow: hidden; }
+  .s10-half {
+    flex: 1;
+    height: 100%;
+    display: flex; flex-direction: column;
+    justify-content: center;
+    padding: 4rem 4rem;
+    position: relative;
+    transition: flex 0.5s ease;
+  }
+  .s10-half:hover { flex: 1.3; }
+  .s10-left { background: var(--red); }
+  .s10-right { background: var(--black); border-left: 1px solid rgba(255,255,255,0.1); }
+  .s10-brand {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    color: var(--white); margin-bottom: 0.5rem;
+  }
+  .s10-founded {
+    font-size: 0.75rem; letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.6); margin-bottom: 2rem;
+    text-transform: uppercase;
+  }
+  .s10-divider { width: 3rem; height: 2px; background: rgba(255,255,255,0.3); margin-bottom: 2rem; }
+  .s10-rows { display: flex; flex-direction: column; gap: 1rem; }
+  .s10-row { display: flex; flex-direction: column; gap: 0.2rem; }
+  .s10-row-label { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+  .s10-row-val { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--white); }
+  .s10-bar-wrap { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 0.4rem; }
+  .s10-bar { height: 100%; border-radius: 2px; background: rgba(255,255,255,0.6); }
+  .s10-vs {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 56px; height: 56px;
+    background: var(--white);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem; font-weight: 800; color: var(--ink);
+    z-index: 10;
+    box-shadow: 0 0 0 8px rgba(0,0,0,0.3);
+  }
+  .s10-img {
+    position: absolute; inset: 0;
+    opacity: 0.08;
+    background-size: cover; background-position: center;
+  }
+  .s10-left .s10-img { background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80'); }
+  .s10-right .s10-img { background-image: url('https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=800&q=80'); }
+
+  /* ===========================
+     SLIDE 11 — GLOBAL MARKET
+  =========================== */
+  #slide-11 { background: var(--grey); }
+  .s11-layout {
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+  }
+  .s11-header { margin-bottom: 3rem; }
+  .s11-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
+    gap: 1.2rem;
+  }
+  .s11-stat-card {
+    background: var(--white);
+    border-radius: 1.2rem;
+    padding: 2rem;
+    border: 1px solid var(--grey-mid);
+    transition: transform 0.3s;
+  }
+  .s11-stat-card:hover { transform: translateY(-4px); }
+  .s11-stat-card.hero { grid-column: 1 / 3; background: var(--ink); }
+  .s11-stat-card.red-c { background: var(--red); }
+  .s11-big-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 3.5rem; font-weight: 800;
+    color: var(--red);
+    line-height: 1; margin-bottom: 0.5rem;
+  }
+  .s11-stat-card.hero .s11-big-num { color: var(--white); }
+  .s11-stat-card.red-c .s11-big-num { color: var(--white); }
+  .s11-num-label { font-size: 0.85rem; color: var(--grey-dark); }
+  .s11-stat-card.hero .s11-num-label { color: rgba(255,255,255,0.5); }
+  .s11-stat-card.red-c .s11-num-label { color: rgba(255,255,255,0.75); }
+  .s11-chart-area {
+    grid-column: 1 / -1;
+    background: var(--white);
+    border-radius: 1.2rem;
+    padding: 2rem;
+    border: 1px solid var(--grey-mid);
+    display: flex; align-items: flex-end; gap: 1rem;
+    height: 140px;
+  }
+  .s11-bar-group { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; flex: 1; }
+  .s11-chart-bar {
+    width: 100%; background: var(--grey-mid);
+    border-radius: 0.4rem 0.4rem 0 0;
+    position: relative;
+    transition: height 0.8s ease;
+  }
+  .s11-chart-bar .bar-fill {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: var(--red); border-radius: 0.4rem 0.4rem 0 0;
+    transition: height 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .s11-bar-label { font-size: 0.68rem; color: var(--grey-dark); text-align: center; }
+
+  /* ===========================
+     SLIDE 12 — GLOBAL EXPANSION
+  =========================== */
+  #slide-12 { background: var(--white); }
+  .s12-layout {
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+    display: grid; grid-template-columns: 1fr 1.2fr;
+    gap: 5rem; align-items: center;
+  }
+  .s12-markets { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 2rem; }
+  .s12-market {
+    background: var(--grey);
+    border: 1px solid var(--grey-mid);
+    border-radius: 0.8rem;
+    padding: 1rem 1.2rem;
+    display: flex; align-items: center; gap: 0.8rem;
+    transition: all 0.3s;
+  }
+  .s12-market:hover { background: var(--red); border-color: var(--red); }
+  .s12-market:hover .s12-mname { color: var(--white); }
+  .s12-mflag { font-size: 1.5rem; }
+  .s12-mname { font-size: 0.85rem; font-weight: 600; color: var(--ink); transition: color 0.3s; }
+  .s12-right {}
+  .s12-timeline-v { display: flex; flex-direction: column; gap: 0; }
+  .s12-ev {
+    display: flex; gap: 1.5rem;
+    padding-bottom: 1.5rem;
+    position: relative;
+  }
+  .s12-ev:not(:last-child)::after {
+    content: '';
+    position: absolute; left: 14px; top: 32px;
+    width: 2px; height: calc(100% - 5px);
+    background: var(--grey-mid);
+  }
+  .s12-evdot {
+    width: 30px; height: 30px; min-width: 30px;
+    background: var(--white); border: 2px solid var(--red);
+    border-radius: 50%; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+  }
+  .s12-ev-content {}
+  .s12-ev-label { font-size: 0.68rem; letter-spacing: 0.15em; color: var(--red); margin-bottom: 0.2rem; text-transform: uppercase; }
+  .s12-ev-text { font-size: 0.85rem; color: var(--ink-mid); line-height: 1.5; }
+
+  /* ===========================
+     SLIDE 13 — CHALLENGES
+  =========================== */
+  #slide-13 { background: var(--black); }
+  .s13-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 60% at 80% 20%, rgba(226,55,68,0.08) 0%, transparent 70%);
+  }
+  .s13-layout {
+    position: relative; z-index: 2;
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+    display: grid; grid-template-columns: 1fr 1.4fr;
+    gap: 5rem; align-items: center;
+  }
+  .s13-left .slide-eyebrow { color: var(--red); }
+  .s13-left .slide-h { color: var(--white); }
+  .s13-challenges { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .s13-ch {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: all 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .s13-ch::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: var(--red);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s;
+  }
+  .s13-ch:hover::before { transform: scaleX(1); }
+  .s13-ch-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+  .s13-ch-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 0.5rem; }
+  .s13-ch-text { font-size: 0.78rem; color: rgba(255,255,255,0.45); line-height: 1.6; }
+
+  /* ===========================
+     SLIDE 14 — SCQA
+  =========================== */
+  #slide-14 { background: var(--grey); }
+  .s14-layout {
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+  }
+  .s14-header { margin-bottom: 3rem; }
+  .s14-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1.5rem; height: 380px; }
+  .s14-card {
+    border-radius: 1.2rem;
+    padding: 2rem;
+    position: relative; overflow: hidden;
+    transition: transform 0.3s;
+  }
+  .s14-card:hover { transform: scale(1.02); }
+  .s14-card.sit { background: var(--white); border: 1px solid var(--grey-mid); }
+  .s14-card.com { background: var(--ink); }
+  .s14-card.que { background: var(--red); }
+  .s14-card.ans { background: var(--white); border: 2px solid var(--red); }
+  .s14-letter {
+    font-family: 'Syne', sans-serif;
+    font-size: 5rem; font-weight: 800;
+    position: absolute; bottom: -1rem; right: 1rem;
+    opacity: 0.08; line-height: 1;
+  }
+  .s14-card.sit .s14-letter { color: var(--ink); }
+  .s14-card.com .s14-letter { color: var(--white); }
+  .s14-card.que .s14-letter { color: var(--white); }
+  .s14-card.ans .s14-letter { color: var(--red); opacity: 0.15; }
+  .s14-card-tag {
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    font-weight: 700; margin-bottom: 0.8rem;
+  }
+  .s14-card.sit .s14-card-tag { color: var(--red); }
+  .s14-card.com .s14-card-tag { color: var(--red-light); }
+  .s14-card.que .s14-card-tag { color: rgba(255,255,255,0.6); }
+  .s14-card.ans .s14-card-tag { color: var(--red); }
+  .s14-card-text { font-size: 0.88rem; line-height: 1.6; }
+  .s14-card.sit .s14-card-text { color: var(--ink-mid); }
+  .s14-card.com .s14-card-text { color: rgba(255,255,255,0.7); }
+  .s14-card.que .s14-card-text { color: rgba(255,255,255,0.9); }
+  .s14-card.ans .s14-card-text { color: var(--ink-mid); }
+
+  /* ===========================
+     SLIDE 15 — ROOT CAUSE
+  =========================== */
+  #slide-15 { background: var(--white); }
+  .s15-layout {
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+  }
+  .s15-header { margin-bottom: 2.5rem; }
+  .s15-fishbone { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; }
+  .s15-branch {
+    background: var(--grey);
+    border-radius: 1.2rem;
+    padding: 1.5rem;
+    border: 1px solid var(--grey-mid);
+    border-top: 4px solid var(--red);
+    transition: all 0.3s;
+  }
+  .s15-branch:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+  .s15-b-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+  .s15-b-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--ink); margin-bottom: 1rem; }
+  .s15-b-points { display: flex; flex-direction: column; gap: 0.5rem; }
+  .s15-b-point {
+    display: flex; align-items: flex-start; gap: 0.6rem;
+    font-size: 0.78rem; color: var(--grey-dark); line-height: 1.4;
+  }
+  .s15-b-point::before {
+    content: '–'; color: var(--red); font-weight: 700;
+    flex-shrink: 0; margin-top: 0.05rem;
+  }
+  .s15-center-prob {
+    margin-top: 2rem;
+    background: var(--red); border-radius: 1rem;
+    padding: 1.5rem 2rem;
+    display: flex; align-items: center; gap: 1.5rem;
+  }
+  .s15-cp-icon { font-size: 2rem; }
+  .s15-cp-text { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--white); }
+  .s15-cp-sub { font-size: 0.82rem; color: rgba(255,255,255,0.7); margin-top: 0.3rem; }
+
+  /* ===========================
+     SLIDE 16 — STRATEGY
+  =========================== */
+  #slide-16 { background: var(--black); }
+  .s16-bg {
+    position: absolute; inset: 0;
+    background: url('https://images.unsplash.com/photo-1502003148287-a82ef80a6abc?w=1400&q=80') center/cover;
+    opacity: 0.05;
+  }
+  .s16-layout {
+    position: relative; z-index: 2;
+    max-width: 1200px; width: 100%;
+    padding: 0 5rem;
+    display: grid; grid-template-columns: 1fr 1.5fr;
+    gap: 5rem; align-items: center;
+  }
+  .s16-left .slide-eyebrow { color: var(--red); }
+  .s16-left .slide-h { color: var(--white); }
+  .s16-options { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1.5rem; }
+  .s16-opt {
+    padding: 1rem 1.5rem;
+    border-radius: 0.8rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    font-size: 0.88rem; color: rgba(255,255,255,0.6);
+    display: flex; align-items: center; gap: 1rem;
+    transition: all 0.3s;
+  }
+  .s16-opt.recommended {
+    background: var(--red); border-color: var(--red);
+    color: var(--white); font-weight: 600;
+  }
+  .s16-opt-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-family: 'Syne', sans-serif; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .s16-opt.recommended .s16-opt-num { background: rgba(255,255,255,0.2); color: var(--white); }
+  .s16-recommendation {
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .s16-rec-header {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .s16-rec-badge {
+    background: var(--red); color: var(--white);
+    font-size: 0.65rem; letter-spacing: 0.15em;
+    padding: 0.3rem 0.8rem; border-radius: 2rem;
+    text-transform: uppercase;
+  }
+  .s16-rec-title { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--white); }
+  .s16-rec-pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .s16-pillar {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: all 0.3s;
+  }
+  .s16-pillar:hover { background: rgba(226,55,68,0.1); border-color: rgba(226,55,68,0.3); }
+  .s16-pillar-icon { font-size: 1.8rem; margin-bottom: 0.8rem; }
+  .s16-pillar-title { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--white); margin-bottom: 0.4rem; }
+  .s16-pillar-text { font-size: 0.78rem; color: rgba(255,255,255,0.45); line-height: 1.5; }
+
+  /* ===========================
+     SLIDE 17 — THANK YOU
+  =========================== */
+  #slide-17 {
+    background: var(--black);
+    flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center;
+  }
+  .s17-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(226,55,68,0.1) 0%, transparent 70%);
+  }
+  .s17-grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .s17-content { position: relative; z-index: 2; max-width: 700px; padding: 0 2rem; }
+  .s17-eyebrow {
+    font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--red); margin-bottom: 1.5rem;
+  }
+  .s17-main {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 2rem;
+  }
+  .s17-line { width: 3rem; height: 2px; background: var(--red); margin: 0 auto 2rem; }
+  .s17-sub {
+    color: rgba(255,255,255,0.4);
+    font-size: 0.9rem; line-height: 1.7;
+    margin-bottom: 3rem;
+  }
+  .s17-team-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; }
+  .s17-member {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.6);
+    font-size: 0.8rem;
+    padding: 0.5rem 1.2rem; border-radius: 2rem;
+    transition: all 0.3s;
+  }
+  .s17-member:hover { background: var(--red); border-color: var(--red); color: var(--white); }
+  .s17-zomato-mark {
+    position: absolute; bottom: 2.5rem; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.15);
+  }
+  .s17-big-bg {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 30vw; font-weight: 800;
+    color: rgba(255,255,255,0.015);
+    pointer-events: none;
+  }
+
+  /* Scroll down hint on slide 1 */
+  .scroll-hint {
+    position: absolute; bottom: 2.5rem; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    color: rgba(255,255,255,0.25); font-size: 0.65rem; letter-spacing: 0.2em;
+    text-transform: uppercase;
+    z-index: 5;
+    animation: bounceHint 2s infinite;
+  }
+  @keyframes bounceHint { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+  .scroll-hint svg { opacity: 0.4; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .s1-content, .s2-layout, .s3-layout, .s4-layout, .s5-layout,
+    .s8-layout, .s9-layout, .s12-layout, .s13-layout, .s15-fishbone,
+    .s16-layout {
+      grid-template-columns: 1fr; padding: 0 2rem; gap: 2rem;
+    }
+    .s1-img, .s2-img, .s4-founder-card { display: none; }
+    .s7-bento { grid-template-columns: 1fr 1fr; }
+    .s10-half { padding: 2rem; }
+    .s11-grid { grid-template-columns: 1fr 1fr; }
+    .s14-grid { grid-template-columns: 1fr; }
+    .s16-rec-pillars { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="progress-bar" id="progressBar"></div>
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-num" id="slideNum">01 / 17</div>
+
+<!-- ========================= SLIDE 1 ========================= -->
+<section class="slide" id="slide-1">
+  <div class="s1-bg"></div>
+  <div class="s1-grid"></div>
+  <div class="s1-img"></div>
+  <div class="s1-content">
+    <div class="s1-left">
+      <div class="s1-tag fade-up">MBA Case Study · Group 8</div>
+      <h1 class="s1-title fade-up">Zomato's Race<span>to Capture the<br>FoodTech Market</span></h1>
+      <p class="s1-sub fade-up">A strategic analysis of growth, competition,<br>and market positioning in the Indian FoodTech ecosystem.</p>
+    </div>
+    <div class="s1-right fade-up">
+      <div class="s1-meta">
+        <div class="s1-meta-label">Academic Context</div>
+        <div class="s1-meta-value">MBA · First Year · Case Presentation</div>
+      </div>
+      <div class="s1-meta">
+        <div class="s1-meta-label">Presented by Group 8</div>
+        <div class="s1-team">
+          <span class="s1-member">Prince</span>
+          <span class="s1-member">Sharmila Khatoon</span>
+          <span class="s1-member">Tanishq Diwakar</span>
+          <span class="s1-member">Tanya Yadav</span>
+          <span class="s1-member">Vidhi Bhatia</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="s1-year-badge">2018</div>
+  <div class="scroll-hint">
+    <svg width="16" height="24" viewBox="0 0 16 24" fill="none"><rect x="1" y="1" width="14" height="22" rx="7" stroke="white" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="white" opacity="0.6"/></svg>
+    Scroll
+  </div>
+</section>
+
+<!-- ========================= SLIDE 2 ========================= -->
+<section class="slide" id="slide-2">
+  <div class="s2-layout">
+    <div class="s2-left">
+      <div class="slide-eyebrow fade-up">01 · Industry Overview</div>
+      <h2 class="slide-h fade-up">FoodTech<br>Industry Context</h2>
+      <div class="bento-grid-2 fade-up">
+        <div class="bento-card red-card">
+          <div class="bento-icon">📱</div>
+          <div class="bento-title">Digital Shift</div>
+          <div class="bento-text">Smartphones & internet transformed how people discover and order food.</div>
+        </div>
+        <div class="bento-card">
+          <div class="bento-icon">🏙️</div>
+          <div class="bento-title">Urban Demand</div>
+          <div class="bento-text">Busy urban lifestyles accelerated demand for convenient food delivery.</div>
+        </div>
+        <div class="bento-card span2">
+          <div class="bento-icon">📈</div>
+          <div class="bento-title">Competitive Landscape</div>
+          <div class="bento-text">Thousands of startups and institutional investors flooded into the FoodTech market, creating intense competition and thin profit margins despite rapid growth.</div>
+        </div>
+      </div>
+    </div>
+    <div class="s2-img fade-up">
+      <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80" alt="Restaurant" loading="lazy">
+      <div class="s2-img-overlay"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 3 ========================= -->
+<section class="slide" id="slide-3">
+  <div class="s3-bg"></div>
+  <div class="s3-layout">
+    <div class="s3-left">
+      <div class="slide-eyebrow fade-up">02 · Strategic Context</div>
+      <h2 class="slide-h fade-up" style="color:var(--white)">Zomato at a<br>Strategic Stage</h2>
+      <div class="s3-stat-row fade-up">
+        <div class="s3-stat">
+          <div class="s3-stat-num">10</div>
+          <div class="s3-stat-label">Years of Operations in 2018</div>
+        </div>
+        <div class="s3-stat">
+          <div class="s3-stat-num">✓</div>
+          <div class="s3-stat-label">Break-even Achieved Globally</div>
+        </div>
+      </div>
+    </div>
+    <div class="s3-points fade-up">
+      <div class="s3-point"><div class="s3-point-text">By 2018, Zomato had completed a decade of operations and achieved break-even across global segments.</div></div>
+      <div class="s3-point"><div class="s3-point-text">Competition in the Indian food delivery market increased rapidly, with major players expanding their delivery networks aggressively.</div></div>
+      <div class="s3-point"><div class="s3-point-text">Zomato now faced a critical strategic decision: how to sustain growth while remaining competitive in a crowded market.</div></div>
+      <div class="s3-point"><div class="s3-point-text">The company needed to weigh domestic consolidation against global ambition — a classic growth dilemma for a scaling startup.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 4 ========================= -->
+<section class="slide" id="slide-4">
+  <div class="s4-layout">
+    <div class="s4-founder-card fade-up">
+      <div class="s4-founder-bg"></div>
+      <div class="s4-founder-overlay">
+        <div class="s4-founder-name">Deepinder Goyal</div>
+        <div class="s4-founder-sub">Founder & CEO · Zomato</div>
+      </div>
+    </div>
+    <div class="s4-right">
+      <div class="slide-eyebrow fade-up">03 · Founding Story</div>
+      <h2 class="slide-h fade-up">Founder &<br>Startup Origin</h2>
+      <div class="s4-timeline fade-up">
+        <div class="s4-event">
+          <div class="s4-dot">🎓</div>
+          <div>
+            <div class="s4-event-year">Pre-2008</div>
+            <div class="s4-event-text">Deepinder Goyal studied at IIT Delhi and worked at Bain & Company before turning entrepreneur.</div>
+          </div>
+        </div>
+        <div class="s4-event">
+          <div class="s4-dot">💡</div>
+          <div>
+            <div class="s4-event-year">2008</div>
+            <div class="s4-event-text">The idea emerged from the difficulty people faced accessing restaurant menus. Goyal and Pankaj Chaddah digitized and uploaded menus online, founding Foodiebay.</div>
+          </div>
+        </div>
+        <div class="s4-event">
+          <div class="s4-dot">🗺️</div>
+          <div>
+            <div class="s4-event-year">2008–2010</div>
+            <div class="s4-event-text">Initially focused on Delhi-NCR, it rapidly became the largest restaurant directory in the region, attracting users and restaurant partners alike.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 5 ========================= -->
+<section class="slide" id="slide-5">
+  <div class="s5-layout">
+    <div class="s5-left">
+      <div class="slide-eyebrow fade-up">04 · Brand Evolution</div>
+      <h2 class="slide-h fade-up" style="color:var(--white)">Transformation<br>into Zomato</h2>
+      <p class="s5-desc fade-up">In 2010, Foodiebay was rebranded as Zomato — marking a pivotal transformation from a local Delhi restaurant directory into India's most ambitious food discovery platform.</p>
+      <div class="s5-features fade-up">
+        <div class="s5-feat"><div class="s5-feat-icon">🏙️</div><div class="s5-feat-text">Expanded to multiple cities across India</div></div>
+        <div class="s5-feat"><div class="s5-feat-icon">🔍</div><div class="s5-feat-text">Search by cuisine, ratings, price & location</div></div>
+        <div class="s5-feat"><div class="s5-feat-icon">🤝</div><div class="s5-feat-text">Rapid growth in users & restaurant partnerships</div></div>
+      </div>
+    </div>
+    <div class="s5-logo-area fade-up">
+      <div class="s5-brand-old">Foodiebay</div>
+      <div class="s5-arrow">↓</div>
+      <div class="s5-big-year">2010</div>
+      <div class="s5-brand-new">Zomato</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 6 ========================= -->
+<section class="slide" id="slide-6">
+  <div class="s6-header">
+    <div class="slide-eyebrow">05 · Growth Journey</div>
+    <h2 class="slide-h" style="color:var(--white);font-size:2rem;">Zomato Growth Timeline</h2>
+  </div>
+  <div class="s6-scroll-hint">
+    <span>Navigate</span>
+    <span class="s6-scroll-hint-arrow">→</span>
+  </div>
+  <div class="s6-track-wrapper">
+    <div class="s6-track" id="s6Track">
+      <div class="s6-item">
+        <div class="s6-dot-outer">🍽️</div>
+        <div class="s6-year">2008</div>
+        <div class="s6-card">
+          <div class="s6-card-title">Foodiebay Founded</div>
+          <div class="s6-card-text">Restaurant discovery platform launched in Delhi-NCR. Digitized menus uploaded online for easy access.</div>
+        </div>
+      </div>
+      <div class="s6-item">
+        <div class="s6-dot-outer">🔤</div>
+        <div class="s6-year">2010</div>
+        <div class="s6-card">
+          <div class="s6-card-title">Rebrand to Zomato</div>
+          <div class="s6-card-text">Foodiebay renamed Zomato. National expansion begins with multi-city restaurant database rollout.</div>
+        </div>
+      </div>
+      <div class="s6-item">
+        <div class="s6-dot-outer">🌏</div>
+        <div class="s6-year">2012</div>
+        <div class="s6-card">
+          <div class="s6-card-title">International Expansion</div>
+          <div class="s6-card-text">Zomato expands into UAE, UK, South Africa, Philippines — becoming a global restaurant discovery platform.</div>
+        </div>
+      </div>
+      <div class="s6-item">
+        <div class="s6-dot-outer">🛵</div>
+        <div class="s6-year">2015</div>
+        <div class="s6-card">
+          <div class="s6-card-title">Online Ordering & Delivery</div>
+          <div class="s6-card-text">Launch of food delivery logistics network. Transition from pure discovery to full-service delivery platform.</div>
+        </div>
+      </div>
+      <div class="s6-item">
+        <div class="s6-dot-outer">⭐</div>
+        <div class="s6-year">2017</div>
+        <div class="s6-card">
+          <div class="s6-card-title">Zomato Gold Launched</div>
+          <div class="s6-card-text">Subscription loyalty program introduced. Complimentary dishes and drinks at partner restaurants nationwide.</div>
+        </div>
+      </div>
+      <div class="s6-item">
+        <div class="s6-dot-outer">🌱</div>
+        <div class="s6-year">2018</div>
+        <div class="s6-card">
+          <div class="s6-card-title">Hyperpure Platform</div>
+          <div class="s6-card-text">B2B restaurant supply chain platform launched. Farm-to-fork fresh ingredient sourcing for restaurant partners.</div>
+        </div>
+      </div>
+      <div class="s6-item">
+        <div class="s6-dot-outer">⚖️</div>
+        <div class="s6-year">2018</div>
+        <div class="s6-card">
+          <div class="s6-card-title">Global Break-even</div>
+          <div class="s6-card-text">Zomato achieves break-even across global segments, marking a milestone in its path toward profitability.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="s6-prev" id="s6Prev">←</div>
+  <div class="s6-next" id="s6Next">→</div>
+</section>
+
+<!-- ========================= SLIDE 7 ========================= -->
+<section class="slide" id="slide-7">
+  <div class="s7-layout">
+    <div class="s7-header">
+      <div class="slide-eyebrow fade-up">06 · Business Model</div>
+      <h2 class="slide-h fade-up">Business Processes<br>& Core Offerings</h2>
+    </div>
+    <div class="s7-bento fade-up">
+      <div class="s7-card tall">
+        <div class="s7-card-icon">🛵</div>
+        <div class="s7-card-title">Delivery</div>
+        <div class="s7-card-text">End-to-end online food ordering and delivery logistics. Proprietary delivery partner network across hundreds of Indian cities, powered by real-time tracking and smart routing algorithms.</div>
+        <div class="s7-tags">
+          <span class="s7-tag">Last-mile logistics</span>
+          <span class="s7-tag">Real-time tracking</span>
+          <span class="s7-tag">Smart routing</span>
+        </div>
+        <div class="s7-card-bg-num">01</div>
+      </div>
+      <div class="s7-card red">
+        <div class="s7-card-icon">🍽️</div>
+        <div class="s7-card-title">Dining Out</div>
+        <div class="s7-card-text">Restaurant discovery, reviews, ratings, and reservations for in-person dining experiences.</div>
+        <div class="s7-card-bg-num">02</div>
+      </div>
+      <div class="s7-card">
+        <div class="s7-card-icon">📊</div>
+        <div class="s7-card-title">MIS Dashboards</div>
+        <div class="s7-card-text">Performance monitoring through real-time management information systems and analytics.</div>
+        <div class="s7-card-bg-num">03</div>
+      </div>
+      <div class="s7-card">
+        <div class="s7-card-icon">🌱</div>
+        <div class="s7-card-title">Hyperpure</div>
+        <div class="s7-card-text">B2B supply chain platform providing farm-fresh ingredients directly to restaurant partners.</div>
+        <div class="s7-card-bg-num">04</div>
+      </div>
+      <div class="s7-card">
+        <div class="s7-card-icon">🗄️</div>
+        <div class="s7-card-title">Restaurant Database</div>
+        <div class="s7-card-text">Comprehensive management of restaurant listings, menus, and partner information.</div>
+        <div class="s7-card-bg-num">05</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 8 ========================= -->
+<section class="slide" id="slide-8">
+  <div class="s8-layout">
+    <div class="s8-left">
+      <div class="slide-eyebrow fade-up">07 · Go-to-Market</div>
+      <h2 class="slide-h fade-up">Marketing<br>Strategy</h2>
+      <div class="s8-pillars fade-up">
+        <div class="s8-pillar"><div class="s8-pillar-icon">🎯</div><div class="s8-pillar-text">Target urban customers aged 18–35</div></div>
+        <div class="s8-pillar"><div class="s8-pillar-icon">🔗</div><div class="s8-pillar-text">Referral programs to grow user base virally</div></div>
+        <div class="s8-pillar"><div class="s8-pillar-icon">📲</div><div class="s8-pillar-text">Strong presence across social media platforms</div></div>
+        <div class="s8-pillar"><div class="s8-pillar-icon">🏷️</div><div class="s8-pillar-text">Promotional campaigns with discounts & promo codes</div></div>
+        <div class="s8-pillar"><div class="s8-pillar-icon">✍️</div><div class="s8-pillar-text">Content marketing through blogs & digital campaigns</div></div>
+      </div>
+    </div>
+    <div class="s8-visual fade-up">
+      <div class="s8-vcard big" style="height:200px">
+        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80" alt="Food" loading="lazy">
+        <div class="s8-vcard-label">Content Marketing</div>
+      </div>
+      <div class="s8-vcard">
+        <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500&q=80" alt="City" loading="lazy">
+        <div class="s8-vcard-label">Urban Targeting</div>
+      </div>
+      <div class="s8-vcard">
+        <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=500&q=80" alt="Mobile" loading="lazy">
+        <div class="s8-vcard-label">Digital Presence</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 9 ========================= -->
+<section class="slide" id="slide-9">
+  <div class="s9-bg"></div>
+  <div class="s9-layout">
+    <div class="s9-left">
+      <div class="slide-eyebrow fade-up">08 · Market Competition</div>
+      <h2 class="slide-h fade-up" style="color:var(--white)">Race in the<br>Indian FoodTech<br>Sector</h2>
+      <div class="s9-competitors fade-up">
+        <div class="s9-comp">
+          <div class="s9-comp-icon">🟠</div>
+          <div><div class="s9-comp-name">Swiggy</div><div class="s9-comp-detail">Founded 2014 · Bangalore</div></div>
+          <div class="s9-comp-badge">Main Rival</div>
+        </div>
+        <div class="s9-comp">
+          <div class="s9-comp-icon">⚫</div>
+          <div><div class="s9-comp-name">UberEATS</div><div class="s9-comp-detail">Entered India · Global Giant</div></div>
+        </div>
+        <div class="s9-comp">
+          <div class="s9-comp-icon">🔴</div>
+          <div><div class="s9-comp-name">Foodpanda</div><div class="s9-comp-detail">Asia-focused · OLX-backed</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="s9-right fade-up">
+      <div class="s9-dev">
+        <div class="s9-dev-year">2014</div>
+        <div class="s9-dev-text">Swiggy launches in Bangalore with a delivery-first model, quickly expanding to major Indian cities and threatening Zomato's market position.</div>
+      </div>
+      <div class="s9-dev">
+        <div class="s9-dev-year">2017</div>
+        <div class="s9-dev-text">UberEATS enters India with aggressive pricing and expansion strategy, leveraging Uber's established driver network for rapid scale-up.</div>
+      </div>
+      <div class="s9-dev">
+        <div class="s9-dev-year">2018</div>
+        <div class="s9-dev-text">Companies across the sector invest heavily in delivery infrastructure, driver incentives, and marketing — dramatically raising the cost of customer acquisition.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 10 — SPLIT SCREEN ========================= -->
+<section class="slide" id="slide-10">
+  <div class="s10-vs">VS</div>
+  <div class="s10-half s10-left">
+    <div class="s10-img"></div>
+    <div style="position:relative;z-index:2">
+      <div class="slide-eyebrow" style="color:rgba(255,255,255,0.6)">09 · Head to Head</div>
+      <div class="s10-brand">Zomato</div>
+      <div class="s10-founded">Founded 2008 · Delhi</div>
+      <div class="s10-divider"></div>
+      <div class="s10-rows">
+        <div class="s10-row">
+          <div class="s10-row-label">Primary Strength</div>
+          <div class="s10-row-val">Restaurant Discovery & Reviews</div>
+          <div class="s10-bar-wrap"><div class="s10-bar" style="width:80%"></div></div>
+        </div>
+        <div class="s10-row">
+          <div class="s10-row-label">Core Model</div>
+          <div class="s10-row-val">Discovery → Delivery</div>
+          <div class="s10-bar-wrap"><div class="s10-bar" style="width:75%"></div></div>
+        </div>
+        <div class="s10-row">
+          <div class="s10-row-label">Global Presence</div>
+          <div class="s10-row-val">Yes — 24 Countries</div>
+          <div class="s10-bar-wrap"><div class="s10-bar" style="width:90%"></div></div>
+        </div>
+        <div class="s10-row">
+          <div class="s10-row-label">Unique Feature</div>
+          <div class="s10-row-val">Zomato Gold & Hyperpure</div>
+          <div class="s10-bar-wrap"><div class="s10-bar" style="width:70%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="s10-half s10-right">
+    <div class="s10-img"></div>
+    <div style="position:relative;z-index:2">
+      <div class="slide-eyebrow" style="color:rgba(255,255,255,0.4)">Competitor</div>
+      <div class="s10-brand">Swiggy</div>
+      <div class="s10-founded">Founded 2014 · Bangalore</div>
+      <div class="s10-divider"></div>
+      <div class="s10-rows">
+        <div class="s10-row">
+          <div class="s10-row-label">Primary Strength</div>
+          <div class="s10-row-val">Delivery Speed & Logistics</div>
+          <div class="s10-bar-wrap"><div class="s10-bar" style="width:88%"></div></div>
+        </div>
+        <div class="s10-row">
+          <div class="s10-row-label">Core Model</div>
+          <div class="s10-row-val">Delivery-First Platform</div>
+          <div class="s10-bar-wrap"><div class="s10-bar" style="width:85%"></div></div>
+        </div>
+        <div class="s10-row">
+          <div class="s10-row-label">Global Presence</div>
+          <div class="s10-row-val">India-focused</div>
+          <div class="s10-bar-wrap"><div class="s10-bar" style="width:35%"></div></div>
+        </div>
+        <div class="s10-row">
+          <div class="s10-row-label">Unique Feature</div>
+          <div class="s10-row-val">Swiggy Instamart & Genie</div>
+          <div class="s10-bar-wrap"><div class="s10-bar" style="width:72%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 11 ========================= -->
+<section class="slide" id="slide-11">
+  <div class="s11-layout">
+    <div class="s11-header">
+      <div class="slide-eyebrow fade-up">10 · Market Scale</div>
+      <h2 class="slide-h fade-up">Global FoodTech Market</h2>
+    </div>
+    <div class="s11-grid fade-up">
+      <div class="s11-stat-card hero">
+        <div class="s11-big-num">$350B</div>
+        <div class="s11-num-label">Global online food & grocery market estimated value</div>
+      </div>
+      <div class="s11-stat-card red-c">
+        <div class="s11-big-num">4,700+</div>
+        <div class="s11-num-label">FoodTech startups worldwide</div>
+      </div>
+      <div class="s11-stat-card">
+        <div class="s11-big-num" style="color:var(--red)">2,700+</div>
+        <div class="s11-num-label">Online food-ordering startups received major investment</div>
+      </div>
+      <div class="s11-stat-card">
+        <div class="s11-big-num" style="color:var(--red)">📈</div>
+        <div class="s11-num-label">Driven by digital adoption & changing consumer habits across emerging markets</div>
+      </div>
+      <div class="s11-chart-area">
+        <div class="s11-bar-group">
+          <div class="s11-chart-bar" style="height:80px"><div class="bar-fill" style="height:35%"></div></div>
+          <div class="s11-bar-label">2015</div>
+        </div>
+        <div class="s11-bar-group">
+          <div class="s11-chart-bar" style="height:80px"><div class="bar-fill" style="height:50%"></div></div>
+          <div class="s11-bar-label">2016</div>
+        </div>
+        <div class="s11-bar-group">
+          <div class="s11-chart-bar" style="height:80px"><div class="bar-fill" style="height:60%"></div></div>
+          <div class="s11-bar-label">2017</div>
+        </div>
+        <div class="s11-bar-group">
+          <div class="s11-chart-bar" style="height:80px"><div class="bar-fill" style="height:80%"></div></div>
+          <div class="s11-bar-label">2018</div>
+        </div>
+        <div class="s11-bar-group">
+          <div class="s11-chart-bar" style="height:80px"><div class="bar-fill" style="height:95%"></div></div>
+          <div class="s11-bar-label">2019</div>
+        </div>
+        <div class="s11-bar-group">
+          <div class="s11-chart-bar" style="height:80px"><div class="bar-fill" style="height:100%"></div></div>
+          <div class="s11-bar-label">2020</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 12 ========================= -->
+<section class="slide" id="slide-12">
+  <div class="s12-layout">
+    <div class="s12-left">
+      <div class="slide-eyebrow fade-up">11 · Global Reach</div>
+      <h2 class="slide-h fade-up">International<br>Expansion Strategy</h2>
+      <div class="s12-markets fade-up">
+        <div class="s12-market"><div class="s12-mflag">🇦🇪</div><div class="s12-mname">UAE</div></div>
+        <div class="s12-market"><div class="s12-mflag">🇬🇧</div><div class="s12-mname">United Kingdom</div></div>
+        <div class="s12-market"><div class="s12-mflag">🇵🇭</div><div class="s12-mname">Philippines</div></div>
+        <div class="s12-market"><div class="s12-mflag">🇿🇦</div><div class="s12-mname">South Africa</div></div>
+        <div class="s12-market"><div class="s12-mflag">🇳🇿</div><div class="s12-mname">New Zealand</div></div>
+        <div class="s12-market"><div class="s12-mflag">🌍</div><div class="s12-mname">24+ Markets</div></div>
+      </div>
+    </div>
+    <div class="s12-right fade-up">
+      <div class="s12-timeline-v">
+        <div class="s12-ev">
+          <div class="s12-evdot">🏆</div>
+          <div class="s12-ev-content">
+            <div class="s12-ev-label">Acquisition</div>
+            <div class="s12-ev-text">Acquired UrbanSpoon — a major US and Australian restaurant discovery platform — to fast-track international market presence.</div>
+          </div>
+        </div>
+        <div class="s12-ev">
+          <div class="s12-evdot">📋</div>
+          <div class="s12-ev-content">
+            <div class="s12-ev-label">Acquisition</div>
+            <div class="s12-ev-text">Acquired MenuMania (New Zealand), Obedovat (Czech Republic), and other regional platforms to build local databases.</div>
+          </div>
+        </div>
+        <div class="s12-ev">
+          <div class="s12-evdot">⚠️</div>
+          <div class="s12-ev-content">
+            <div class="s12-ev-label">Strategic Retreat</div>
+            <div class="s12-ev-text">High operational costs and difficult unit economics forced Zomato to withdraw from several international markets, refocusing on profitable geographies.</div>
+          </div>
+        </div>
+        <div class="s12-ev">
+          <div class="s12-evdot">🎯</div>
+          <div class="s12-ev-content">
+            <div class="s12-ev-label">Lesson Learned</div>
+            <div class="s12-ev-text">Global ambition must be balanced against operational efficiency — a key tension at the heart of Zomato's 2018 strategic dilemma.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 13 ========================= -->
+<section class="slide" id="slide-13">
+  <div class="s13-bg"></div>
+  <div class="s13-layout">
+    <div class="s13-left">
+      <div class="slide-eyebrow fade-up">12 · Problem Space</div>
+      <h2 class="slide-h fade-up" style="color:var(--white)">Key Challenges<br>Facing Zomato</h2>
+    </div>
+    <div class="s13-challenges fade-up">
+      <div class="s13-ch">
+        <div class="s13-ch-icon">⚔️</div>
+        <div class="s13-ch-title">Intense Competition</div>
+        <div class="s13-ch-text">Swiggy's rapid expansion and UberEATS's deep pockets intensified competition for market share across Indian cities.</div>
+      </div>
+      <div class="s13-ch">
+        <div class="s13-ch-icon">💸</div>
+        <div class="s13-ch-title">Rising Logistics Costs</div>
+        <div class="s13-ch-text">Delivery infrastructure expansion, driver incentives, and fuel costs dramatically increased per-order delivery expenses.</div>
+      </div>
+      <div class="s13-ch">
+        <div class="s13-ch-icon">🏷️</div>
+        <div class="s13-ch-title">Discount Dependency</div>
+        <div class="s13-ch-text">Heavy reliance on promotional discounts and promo codes to attract and retain customers eroded contribution margins.</div>
+      </div>
+      <div class="s13-ch">
+        <div class="s13-ch-icon">🌐</div>
+        <div class="s13-ch-title">International Overstretch</div>
+        <div class="s13-ch-text">Operating across 24 markets created financial pressure with high investment requirements and complex operational management.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 14 ========================= -->
+<section class="slide" id="slide-14">
+  <div class="s14-layout">
+    <div class="s14-header">
+      <div class="slide-eyebrow fade-up">13 · Framework</div>
+      <h2 class="slide-h fade-up">SCQA Framework</h2>
+    </div>
+    <div class="s14-grid fade-up">
+      <div class="s14-card sit">
+        <div class="s14-card-tag">Situation</div>
+        <div class="s14-card-text">Zomato expanded from a restaurant discovery platform into a global food delivery company over 10 years, achieving international presence across 24 markets.</div>
+        <div class="s14-letter">S</div>
+      </div>
+      <div class="s14-card com">
+        <div class="s14-card-tag">Complication</div>
+        <div class="s14-card-text">Competition intensified rapidly while operational costs climbed. Logistics expenses, discount dependency, and international overstretch created mounting financial pressure.</div>
+        <div class="s14-letter">C</div>
+      </div>
+      <div class="s14-card que">
+        <div class="s14-card-tag">Question</div>
+        <div class="s14-card-text">How can Zomato sustain growth while maintaining profitability in a hyper-competitive market with razor-thin margins?</div>
+        <div class="s14-letter">Q</div>
+      </div>
+      <div class="s14-card ans">
+        <div class="s14-card-tag">Answer</div>
+        <div class="s14-card-text">Zomato must decide whether to focus on domestic market leadership, pursue selective global expansion, or adopt a balanced hybrid strategy.</div>
+        <div class="s14-letter">A</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 15 ========================= -->
+<section class="slide" id="slide-15">
+  <div class="s15-layout">
+    <div class="s15-header">
+      <div class="slide-eyebrow fade-up">14 · Analysis</div>
+      <h2 class="slide-h fade-up">Root Cause Analysis</h2>
+    </div>
+    <div class="s15-fishbone fade-up">
+      <div class="s15-branch">
+        <div class="s15-b-icon">⚔️</div>
+        <div class="s15-b-title">Competition</div>
+        <div class="s15-b-points">
+          <div class="s15-b-point">Rapid expansion of Swiggy with delivery-first model</div>
+          <div class="s15-b-point">Entry of UberEATS with global capital and resources</div>
+          <div class="s15-b-point">Aggressive marketing and driver incentive wars</div>
+        </div>
+      </div>
+      <div class="s15-branch">
+        <div class="s15-b-icon">💸</div>
+        <div class="s15-b-title">Cost Structure</div>
+        <div class="s15-b-points">
+          <div class="s15-b-point">High last-mile delivery logistics costs</div>
+          <div class="s15-b-point">Heavy spending on customer acquisition discounts</div>
+          <div class="s15-b-point">Technology infrastructure investment</div>
+        </div>
+      </div>
+      <div class="s15-branch">
+        <div class="s15-b-icon">📊</div>
+        <div class="s15-b-title">Market Dynamics</div>
+        <div class="s15-b-points">
+          <div class="s15-b-point">Highly competitive, low-margin industry structure</div>
+          <div class="s15-b-point">Price-sensitive customer base in India</div>
+          <div class="s15-b-point">Restaurant negotiation power challenges</div>
+        </div>
+      </div>
+      <div class="s15-branch">
+        <div class="s15-b-icon">🌐</div>
+        <div class="s15-b-title">International</div>
+        <div class="s15-b-points">
+          <div class="s15-b-point">Operational complexity across 24 markets</div>
+          <div class="s15-b-point">High capital requirements per new market</div>
+          <div class="s15-b-point">Regulatory and cultural adaptation costs</div>
+        </div>
+      </div>
+    </div>
+    <div class="s15-center-prob fade-up">
+      <div class="s15-cp-icon">⚡</div>
+      <div>
+        <div class="s15-cp-text">Core Problem: Strategic Growth Dilemma</div>
+        <div class="s15-cp-sub">How to scale efficiently while managing rising costs and intensifying competition across domestic and global markets.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 16 ========================= -->
+<section class="slide" id="slide-16">
+  <div class="s16-bg"></div>
+  <div class="s16-layout">
+    <div class="s16-left">
+      <div class="slide-eyebrow fade-up">15 · Recommendation</div>
+      <h2 class="slide-h fade-up" style="color:var(--white)">Strategic Options<br>& Recommendation</h2>
+      <div class="s16-options fade-up">
+        <div class="s16-opt">
+          <div class="s16-opt-num">A</div>
+          Domestic Focus — Strengthen India leadership
+        </div>
+        <div class="s16-opt">
+          <div class="s16-opt-num">B</div>
+          Global Expansion — Expand internationally
+        </div>
+        <div class="s16-opt recommended">
+          <div class="s16-opt-num">C</div>
+          ★ Balanced Strategy — India-first with selective global expansion
+        </div>
+      </div>
+    </div>
+    <div class="s16-recommendation fade-up">
+      <div class="s16-rec-header">
+        <div class="s16-rec-badge">Recommended</div>
+      </div>
+      <div class="s16-rec-title">Balanced Approach</div>
+      <div class="s16-rec-pillars">
+        <div class="s16-pillar">
+          <div class="s16-pillar-icon">🏆</div>
+          <div class="s16-pillar-title">Domestic Leadership</div>
+          <div class="s16-pillar-text">Deepen market penetration in India's Tier 1 and Tier 2 cities. Invest in loyalty programs, restaurant partnerships, and hyperlocal delivery infrastructure.</div>
+        </div>
+        <div class="s16-pillar">
+          <div class="s16-pillar-icon">🌐</div>
+          <div class="s16-pillar-title">Selective Global</div>
+          <div class="s16-pillar-text">Retain presence in high-margin international markets only. Exit markets with poor unit economics; redeploy capital to higher-ROI opportunities.</div>
+        </div>
+        <div class="s16-pillar">
+          <div class="s16-pillar-icon">⚙️</div>
+          <div class="s16-pillar-title">Operational Efficiency</div>
+          <div class="s16-pillar-text">Invest in technology and logistics optimization to reduce per-delivery cost. Move away from unsustainable discount-driven growth models.</div>
+        </div>
+        <div class="s16-pillar">
+          <div class="s16-pillar-icon">📈</div>
+          <div class="s16-pillar-title">Diversified Revenue</div>
+          <div class="s16-pillar-text">Scale Hyperpure B2B business and Zomato Gold subscription revenue to reduce dependency on thin delivery margins.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= SLIDE 17 ========================= -->
+<section class="slide" id="slide-17">
+  <div class="s17-bg"></div>
+  <div class="s17-grid"></div>
+  <div class="s17-big-bg">Z</div>
+  <div class="s17-content">
+    <div class="s17-eyebrow fade-up">MBA · First Year · Group 8</div>
+    <div class="s17-main fade-up">Thank<br>You</div>
+    <div class="s17-line fade-up"></div>
+    <p class="s17-sub fade-up">Zomato's Race to Capture the FoodTech Market<br>A Strategic Case Study Analysis</p>
+    <div class="s17-team-grid fade-up">
+      <span class="s17-member">Prince</span>
+      <span class="s17-member">Sharmila Khatoon</span>
+      <span class="s17-member">Tanishq Diwakar</span>
+      <span class="s17-member">Tanya Yadav</span>
+      <span class="s17-member">Vidhi Bhatia</span>
+    </div>
+  </div>
+  <div class="s17-zomato-mark">Zomato · Case Study Presentation · 2024</div>
+</section>
+
+<script>
+  // ---- Cursor ----
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let cx = 0, cy = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { cx = e.clientX; cy = e.clientY; });
+  function animCursor() {
+    cursor.style.left = cx + 'px'; cursor.style.top = cy + 'px';
+    rx += (cx - rx) * 0.12; ry += (cy - ry) * 0.12;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animCursor);
+  }
+  animCursor();
+
+  // ---- Nav Dots ----
+  const slides = document.querySelectorAll('.slide');
+  const navDots = document.getElementById('navDots');
+  const slideNum = document.getElementById('slideNum');
+  const progressBar = document.getElementById('progressBar');
+
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    d.title = `Slide ${i+1}`;
+    d.addEventListener('click', () => slides[i].scrollIntoView({ behavior: 'smooth' }));
+    navDots.appendChild(d);
+  });
+
+  // ---- Scroll Observer ----
+  let currentSlide = 0;
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = Array.from(slides).indexOf(entry.target);
+        currentSlide = idx;
+        document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+        const n = String(idx + 1).padStart(2, '0');
+        slideNum.textContent = `${n} / 17`;
+        progressBar.style.width = `${((idx + 1) / slides.length) * 100}%`;
+        // Trigger animations
+        entry.target.querySelectorAll('.fade-up').forEach((el, i) => {
+          setTimeout(() => el.classList.add('visible'), i * 80);
+        });
+      }
+    });
+  }, { threshold: 0.5 });
+  slides.forEach(s => io.observe(s));
+
+  // ---- Timeline Horizontal Scroll ----
+  const track = document.getElementById('s6Track');
+  const prev = document.getElementById('s6Prev');
+  const next = document.getElementById('s6Next');
+  let s6Pos = 0;
+  const s6ItemW = 300 + 0; // item min-width + gap
+  const s6Items = track.querySelectorAll('.s6-item');
+  const s6MaxPos = -(s6ItemW * (s6Items.length - 3));
+
+  function setS6(pos) {
+    s6Pos = Math.max(s6MaxPos, Math.min(0, pos));
+    track.style.transform = `translateX(${s6Pos}px)`;
+  }
+  prev.addEventListener('click', () => setS6(s6Pos + (s6ItemW + 30)));
+  next.addEventListener('click', () => setS6(s6Pos - (s6ItemW + 30)));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+      if (currentSlide < slides.length - 1) slides[currentSlide + 1].scrollIntoView({ behavior: 'smooth' });
+    }
+    if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      if (currentSlide > 0) slides[currentSlide - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+    if (e.key === 'ArrowRight' && currentSlide === 5) setS6(s6Pos - (s6ItemW + 30));
+    if (e.key === 'ArrowLeft' && currentSlide === 5) setS6(s6Pos + (s6ItemW + 30));
+  });
+
+  // Touch swipe
+  let touchStartY = 0;
+  document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
+  document.addEventListener('touchend', e => {
+    const dy = touchStartY - e.changedTouches[0].clientY;
+    if (Math.abs(dy) > 50) {
+      if (dy > 0 && currentSlide < slides.length - 1) slides[currentSlide + 1].scrollIntoView({ behavior: 'smooth' });
+      if (dy < 0 && currentSlide > 0) slides[currentSlide - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  // Trigger first slide animations immediately
+  setTimeout(() => {
+    slides[0].querySelectorAll('.fade-up').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 120 + 200);
+    });
+  }, 300);
+</script>
+</body>
+</html>
